@@ -8,37 +8,64 @@
 import UIKit
 
 final class ViewController: UIViewController {
-
+    
+    
     @IBOutlet var colorizedView: UIView!
     
-    @IBOutlet var redColorValue: UILabel!
-    @IBOutlet var greenColorValue: UILabel!
-    @IBOutlet var blueColorValue: UILabel!
+    @IBOutlet var redColorLabel: UILabel!
+    @IBOutlet var greenColorLabel: UILabel!
+    @IBOutlet var blueColorLabel: UILabel!
     
     @IBOutlet var redSlider: UISlider!
     @IBOutlet var greenSlider: UISlider!
     @IBOutlet var blueSlider: UISlider!
     
+    @IBOutlet var redTextField: UITextField!
+    @IBOutlet var greenTextField: UITextField!
+    @IBOutlet var blueTextField: UITextField!
+    
+    
+    let startVC = StartViewController()
+    weak var delegate: ChangeBakcgroundColorDelegate?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        addDelegates()
+        setupLabels()
         colorizedView.layer.cornerRadius = 20
-        setColor()
-        
-        redColorValue.text = string(from: redSlider)
-        greenColorValue.text = string(from: greenSlider)
-        blueColorValue.text = string(from: blueSlider)
+        colorizedView.backgroundColor = startVC.view.backgroundColor
+    }
+    private func setupLabels() {
+        redColorLabel.text = string(from: redSlider)
+        greenColorLabel.text = string(from: greenSlider)
+        blueColorLabel.text = string(from: blueSlider)
     }
     
     @IBAction func sliderAction(_ sender: UISlider) {
         setColor()
         switch sender {
         case redSlider:
-            redColorValue.text = string(from: redSlider)
+            redColorLabel.text = string(from: redSlider)
+            redTextField.text = string(from: redSlider)
         case greenSlider:
-            greenColorValue.text = string(from: greenSlider)
+            greenColorLabel.text = string(from: greenSlider)
+            greenTextField.text = string(from: greenSlider)
         default:
-            blueColorValue.text = string(from: blueSlider)
+            blueColorLabel.text = string(from: blueSlider)
+            blueColorLabel.text = string(from: blueSlider)
         }
+    }
+    
+    @IBAction func doneButtonPresed(_ sender: Any) {
+        guard let color = colorizedView.backgroundColor else { return }
+        delegate?.changeColor(color: color )
+        dismiss(animated: true)
+    }
+    
+    private func addDelegates() {
+        redTextField.delegate = self
+        greenTextField.delegate = self
+        blueTextField.delegate = self
     }
     
     private func setColor() {
@@ -54,53 +81,26 @@ final class ViewController: UIViewController {
     }
 }
 
+extension ViewController: UITextFieldDelegate {
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        switch textField {
+        case redTextField:
+            redSlider.value = Float(redTextField.text!) ?? 0
+            redColorLabel.text = redTextField.text
+        case greenTextField:
+            greenSlider.value = Float(greenTextField.text!) ?? 0
+            greenColorLabel.text = redTextField.text
+        default:
+            blueSlider.value = Float(blueTextField.text!) ?? 0
+            blueColorLabel.text = blueTextField.text
+        }
+    }
+}
+
 extension Float {
     func cgFloat() -> CGFloat {
         CGFloat(self)
     }
-//        setupRedLabel()
-//        setupGreenLabel()
-//        setupBlueLabel()
-//    }
-    
-//    private func setupRedLabel() {
-//        redColorValue.text = redSlider.value.formatted()
-//        redColorValue.font = UIFont.systemFont(ofSize: 18)
-//        redColorValue.textAlignment = .center
-//        redColorValue.numberOfLines = 2
-//    }
-//    private func setupGreenLabel() {
-//        greenColorValue.text = greenSlider.value.formatted()
-//        greenColorValue.font = UIFont.systemFont(ofSize: 18)
-//        greenColorValue.textAlignment = .center
-//        greenColorValue.numberOfLines = 2
-//    }
-//    private func setupBlueLabel() {
-//        blueColorValue.text = blueSlider.value.formatted()
-//        blueColorValue.font = UIFont.systemFont(ofSize: 18)
-//        blueColorValue.textAlignment = .center
-//        blueColorValue.numberOfLines = 2
-//    }
-//    @IBAction func redSliderAction() {
-//        redSlider.minimumTrackTintColor = .systemRed
-//        redColorValue.text = String(format: "%0.2f",redSlider.value)
-//        setupView()
-//    }
-//    @IBAction func greenSliderAction() {
-//        greenColorValue.text = String(format: "%0.2f",greenSlider.value)
-//        setupView()
-//    }
-//    @IBAction func blueSliderAction() {
-//        blueColorValue.text = String(format: "%0.2f",blueSlider.value)
-//        setupView()
-//    }
-//    private func setupView() {
-//        let color = UIColor(
-//            red: CGFloat(redSlider.value),
-//            green: CGFloat(greenSlider.value),
-//            blue: CGFloat(blueSlider.value),
-//            alpha: 0.5)
-//        colorizedView.backgroundColor = color
-//    }
 }
+
 
