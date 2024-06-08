@@ -22,10 +22,9 @@ class StartViewController: UIViewController {
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-
-        let secondVC = segue.destination as? ViewController
-//        secondVC?.colorizedView.backgroundColor = view.backgroundColor
-        secondVC?.delegate = self
+        guard let secondVC = segue.destination as? ViewController else {return}
+        secondVC.colorOfView = view.backgroundColor
+        secondVC.delegate = self
     }
     
 }

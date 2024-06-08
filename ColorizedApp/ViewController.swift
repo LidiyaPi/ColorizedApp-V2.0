@@ -24,7 +24,7 @@ final class ViewController: UIViewController {
     @IBOutlet var greenTextField: UITextField!
     @IBOutlet var blueTextField: UITextField!
     
-    
+    var colorOfView: UIColor?
     let startVC = StartViewController()
     weak var delegate: ChangeBakcgroundColorDelegate?
     
@@ -32,13 +32,27 @@ final class ViewController: UIViewController {
         super.viewDidLoad()
         addDelegates()
         setupLabels()
+        setupGesture()
         colorizedView.layer.cornerRadius = 20
-        colorizedView.backgroundColor = startVC.view.backgroundColor
+        colorizedView.backgroundColor = colorOfView
     }
+    
+    private func setupGesture() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(hideKeyboard))
+        view.addGestureRecognizer(tapGesture)
+    }
+    
     private func setupLabels() {
         redColorLabel.text = string(from: redSlider)
         greenColorLabel.text = string(from: greenSlider)
         blueColorLabel.text = string(from: blueSlider)
+    }
+    
+    private func displayErrorAlert(message: String) {
+        let alert = UIAlertController(title: "Ошибка", message: message, preferredStyle: .alert)
+        let okAction = UIAlertAction(title: "OK", style: .default)
+        alert.addAction(okAction)
+        present(alert, animated: true, completion: nil)
     }
     
     @IBAction func sliderAction(_ sender: UISlider) {
@@ -52,7 +66,7 @@ final class ViewController: UIViewController {
             greenTextField.text = string(from: greenSlider)
         default:
             blueColorLabel.text = string(from: blueSlider)
-            blueColorLabel.text = string(from: blueSlider)
+            blueTextField.text = string(from: blueSlider)
         }
     }
     
@@ -79,21 +93,45 @@ final class ViewController: UIViewController {
     private func string(from slider: UISlider) -> String {
         String(format: "%.2f", slider.value)
     }
+
+    @objc func hideKeyboard() {
+        view.endEditing(true)
+    }
+    
 }
 
 extension ViewController: UITextFieldDelegate {
+    
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        let currentText = textField.text ?? ""
+        guard let stringRange = Range(range, in: currentText) else { return false }
+
+        let updatedText = currentText.replacingCharacters(in: stringRange, with: string)
+
+        return updatedText.count <= 3
+    }
+
     func textFieldDidEndEditing(_ textField: UITextField) {
+        guard let text = textField.text,
+              let value = Float(text),
+              (0...1).contains(value)
+        else {
+            displayErrorAlert(message: "Некорретный формат данных")
+            textField.text?.removeAll()
+            return
+        }
         switch textField {
         case redTextField:
-            redSlider.value = Float(redTextField.text!) ?? 0
-            redColorLabel.text = redTextField.text
+            redSlider.value = value
+            redColorLabel.text = text
         case greenTextField:
-            greenSlider.value = Float(greenTextField.text!) ?? 0
-            greenColorLabel.text = redTextField.text
+            greenSlider.value = value
+            greenColorLabel.text = text
         default:
-            blueSlider.value = Float(blueTextField.text!) ?? 0
-            blueColorLabel.text = blueTextField.text
+            blueSlider.value = value
+            blueColorLabel.text = text
         }
+        setColor()
     }
 }
 
@@ -102,5 +140,3 @@ extension Float {
         CGFloat(self)
     }
 }
-
-
